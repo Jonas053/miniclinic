@@ -16,6 +16,22 @@
         .status-COMPLETED { color: #10B981; font-weight: bold; }
         .status-CANCELLED { color: #94A3B8; }
     </style>
+    <script>
+        function updateStatus(event, form) {
+            event.preventDefault(); // 阻止表單預設的跳轉行為
+            
+            fetch(form.action, {
+                method: form.method,
+                body: new URLSearchParams(new FormData(form)) // 將表單資料轉為 URL encoded 格式
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // 成功後重整頁面
+                }
+            })
+            .catch(error => {});
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -50,9 +66,16 @@
                     <span th:text="${appt.status}"
                           th:class="${'status-' + appt.status}">BOOKED</span>
                     <form th:if="${#strings.equals(appt.status, 'BOOKED')}" 
-                          th:action="@{/api/appointments/{id}/status(id=${appt.apptId})}" method="post" >
+                          th:action="@{/api/appointments/{id}/status(id=${appt.apptId})}" method="post"
+                          onsubmit="updateStatus(event, this)">
                         <input type="hidden" name="status" value="CANCELLED" />
                         <button type="submit" >取消</button>
+                    </form>
+                    <form th:if="${#strings.equals(appt.status, 'BOOKED')}" 
+                          th:action="@{/api/appointments/{id}/status(id=${appt.apptId})}" method="post"
+                          onsubmit="updateStatus(event, this)">
+                        <input type="hidden" name="status" value="COMPLETED" />
+                        <button type="submit" >完成</button>
                     </form>
                 </td>
             </tr>
